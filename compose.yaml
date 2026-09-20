@@ -6,8 +6,8 @@ services:
     environment:
       TRAVEL_DATA_DIR: /data
       TRAVEL_COOKIE_SECURE: "true"
-    ports:
-      - "127.0.0.1:8000:8000"
+    expose:
+      - "8000"
     volumes:
       - travel-data:/data
     mem_limit: 2g
@@ -20,5 +20,28 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 volumes:
   travel-data:
+  caddy-data:
+  caddy-config:

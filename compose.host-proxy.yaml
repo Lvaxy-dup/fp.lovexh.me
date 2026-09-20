@@ -1,0 +1,6 @@
+# Optional: start only app when an existing host Nginx already owns ports 80/443.
+# docker compose -f compose.yaml -f compose.host-proxy.yaml up -d --build app
+services:
+  app:
+    ports:
+      - "127.0.0.1:8000:8000"

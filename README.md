@@ -47,7 +47,9 @@ Copy-Item .env.example .env
 
 ## 服务器部署
 
-详见 [部署与备份](docs/deployment.md)。提供 Dockerfile、Compose、Nginx 反向代理片段、健康检查、日志轮转及数据卷配置。必须单实例、单 worker；启动锁会拒绝第二个进程使用同一数据目录。
+域名已配置为 **https://fp.lovexh.me**。设置域名 DNS、放行80/443并填写 `.env` 后，执行 `docker compose up -d --build`，应用与 Caddy 一起启动，自动管理 HTTPS 证书。详见 [部署与备份](docs/deployment.md)。已有 Nginx/宝塔的服务器也提供独立反代方案。
+
+提供健康检查、日志轮转及持久数据卷。必须单实例、单 worker；启动锁会拒绝第二个进程使用同一数据目录。
 
 生产环境使用 HTTPS，并启用 `TRAVEL_COOKIE_SECURE=true`。当前按产品决定不设置登录或收费额度。
 

@@ -21,3 +21,9 @@ jobs:
       - run: node --test tests/*.test.mjs
       - run: pip-audit -r requirements.lock
       - run: docker build -t travel-assistant:test .
+      - name: Validate production Compose and Caddy configuration
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+          docker compose -f compose.yaml -f compose.host-proxy.yaml config --quiet
+          docker compose run --rm --no-deps caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile

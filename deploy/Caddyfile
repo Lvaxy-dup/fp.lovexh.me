@@ -1,0 +1,7 @@
+fp.lovexh.me {
+	encode zstd gzip
+	request_body {
+		max_size 21MB
+	}
+	reverse_proxy app:8000
+}

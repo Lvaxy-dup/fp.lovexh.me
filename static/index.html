@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#fcfbf9"><title>徐海差旅助手</title>
+ <link rel="icon" type="image/vnd.microsoft.icon" href="/favicon.ico?v=college-emblem-1" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+ <link rel="icon" type="image/png" href="/static/images/college-emblem.png?v=1" sizes="512x512">
+ <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+ <link rel="stylesheet" href="/static/styles.css?v=20260920"><link rel="stylesheet" href="/static/workspace.css?v=20260920">
+</head>
+<body>
+<svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+ <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m6-11-3 3 3 3"/></symbol>
+ <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8m-8 4h6"/></symbol>
+ <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 3l2 1 2-1 3 1 3-1 2 1 2-1v18l-2-1-2 1-3-1-3 1-2-1-2 1zM8 8h8m-8 4h8m-8 4h4"/></symbol>
+ <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+ <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-3M7 14h10v7H7zM17 11h1"/></symbol>
+ <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+ <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></symbol>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+</defs></svg>
+<div class="app-shell">
+ <aside class="sidebar" id="sidebar" aria-label="出差记录侧栏">
+  <button id="sidebar-toggle" class="icon-button sidebar-toggle" aria-label="收起侧栏" aria-expanded="true" aria-controls="sidebar-content" title="收起侧栏"><svg class="icon"><use href="#i-panel"/></svg></button>
+  <div class="sidebar-content" id="sidebar-content">
+   <a class="brand" href="/" aria-label="徐海差旅助手首页"><img class="brand-emblem" src="/static/images/college-emblem.png" width="48" height="48" alt="徐海学院院徽"><span>徐海<span class="brand-sub">差旅助手</span></span></a>
+   <button id="new-record" class="new-record"><svg class="icon"><use href="#i-plus"/></svg><span>新建出差</span></button>
+   <div class="sidebar-label">我的出差记录</div><nav id="records" aria-label="出差记录"></nav>
+   <button class="sidebar-foot profile-button" data-profile-open aria-label="打开个人信息设置" title="个人信息设置"><span class="avatar" data-profile-avatar>徐</span><span class="profile-summary"><span data-profile-name>个人信息</span><small data-profile-department>设置姓名、职务和部门</small></span><span class="profile-settings-mark" aria-hidden="true">⚙</span></button>
+  </div>
+  <button class="profile-shortcut" data-profile-open aria-label="打开个人信息设置" title="个人信息设置"><span class="avatar" data-profile-avatar>徐</span></button>
+ </aside>
+ <main class="workspace">
+  <header class="topbar">
+   <div class="breadcrumb"><span class="breadcrumb-parent">我的出差<span class="slash">/</span></span><button id="rename" title="重命名出差记录">新的出差</button><span id="save-status" role="status">已保存</span></div>
+   <div class="header-actions"><button id="materials-toggle" class="quiet-button" aria-controls="materials-panel" aria-expanded="true"><svg class="icon"><use href="#i-file"/></svg><span>材料</span></button><button class="print-button" id="print"><svg class="icon"><use href="#i-print"/></svg><span>打印表单</span></button></div>
+  </header>
+  <section class="form-selector" role="tablist" aria-label="选择要填写的表单">
+   <button class="form-choice active" data-form="application" role="tab" aria-selected="true" aria-controls="document-editor"><svg class="choice-icon icon"><use href="#i-file"/></svg><span class="choice-text"><strong>出差申请表</strong><span>出发前 · 活动通知与培训安排</span></span><span class="choice-state">已选择</span></button>
+   <button class="form-choice" data-form="reimbursement" role="tab" aria-selected="false" aria-controls="document-editor"><svg class="choice-icon icon"><use href="#i-receipt"/></svg><span class="choice-text"><strong>差旅报销单</strong><span>返回后 · 车票与费用发票</span></span><span class="choice-state">选择</span></button>
+  </section>
+  <div class="workbench">
+   <section class="document-editor" id="document-editor" aria-label="表单编辑区">
+    <div class="document-toolbar"><div class="document-caption"><h1 id="current-form-title">教职工出差申请表</h1><span id="paper-size">A4 纵向</span></div><button class="icon-button" id="focus-toggle" aria-label="进入专注模式" title="专注模式 · 收起两侧面板" aria-pressed="false"><svg class="icon"><use href="#i-expand"/></svg></button></div>
+    <div class="paper-viewport" id="paper-viewport"><div class="paper-stage" id="paper-stage"><article class="paper application" id="paper" aria-label="可编辑表单"></article></div></div>
+    <footer class="document-footer"><span class="edit-hint"><i class="dot"></i>点击表格编辑 · 自动保存</span><div class="zoom-controls"><button id="zoom-out" class="icon-button" aria-label="缩小表单" title="缩小">−</button><output id="zoom-level" aria-live="polite">100%</output><button id="zoom-in" class="icon-button" aria-label="放大表单" title="放大">＋</button><span class="toolbar-divider"></span><button id="fit" class="fit-button" aria-pressed="true" title="完整显示整张表单">整页适配</button></div></footer>
+   </section>
+   <aside id="materials-panel" class="materials-panel" aria-label="当前表单的材料与填写操作">
+    <div class="panel-heading"><div><h2>准备好材料，交给我。</h2><p id="scope-note">仅用于出差申请表</p></div><button id="materials-close" class="icon-button" aria-label="收起材料面板" title="收起材料面板">×</button></div>
+    <div class="panel-scroll">
+     <section class="import-workspace" aria-label="导入材料">
+      <button class="upload-zone" id="upload"><span class="upload-icon"><svg class="icon"><use href="#i-upload"/></svg></span><strong>点击添加，或拖入材料</strong><span id="upload-hint">会议通知、邀请函、活动或培训安排</span><small>PDF / 图片 / DOCX / 文本 · 单份20MB</small></button>
+      <input type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.docx,.txt,.md" hidden>
+      <fieldset class="engine-choice"><legend>识别方式</legend><label><input type="radio" name="engine" value="deepseek" checked><span>DeepSeek</span><small>逐页阅读</small></label><label><input type="radio" name="engine" value="paddle"><span>PaddleOCR</span><small>版面识别</small></label></fieldset>
+     </section>
+     <section class="materials-details"><div class="material-section-heading"><h2>已导入材料</h2><span id="material-count">0 份</span></div><div id="materials" class="material-list"></div></section>
+     <div id="report-controls" class="report-controls" hidden><h2>实际出差期间</h2><div class="period-inputs"><input type="date" id="report-start" aria-label="实际出差开始日期"><span>至</span><input type="date" id="report-end" aria-label="实际出差结束日期"></div><label class="fee-choice">是否实际收取会务费或培训费<select id="has-fee" aria-label="是否实际收取会务费或培训费"><option value="">根据材料及费用金额判断</option><option value="是">是，实际收费</option><option value="否">否，未收费</option></select></label><p id="allowance-hint" class="hint">每天180元；有会务费或培训费只计首尾，无这两项费用按完整出差日期计算，包含出发日和返回日。</p></div>
+     <div id="checks" class="checks"></div>
+    </div>
+    <div class="panel-action"><section class="generation-status" aria-live="polite"><div class="activity-line"><span id="agent-dot" class="online-dot"></span><span id="activity">先添加材料，再点击填写当前表单。</span></div><span id="result-stats"></span></section><button id="autofill" class="primary full"><svg class="icon"><use href="#i-spark"/></svg>填写当前表单</button><p class="import-note">导入后不会自动填写，确认材料后再开始。</p></div>
+   </aside>
+  </div>
+ </main>
+ <footer class="studio-credit" aria-label="开发与运维">
+  <img src="/static/images/studio-510.jpg" width="42" height="42" alt="计算机系510工作室 Logo">
+  <div class="studio-credit-text"><span>本系统由<strong>计算机系510工作室</strong>开发运维。</span><span class="studio-advisor">指导老师：<strong>杨磊</strong></span></div>
+ </footer>
+</div>
+<button id="panel-backdrop" class="panel-backdrop" aria-label="关闭展开的侧栏" hidden></button>
+<div id="toast" class="toast" role="alert" hidden></div>
+<dialog id="profile-dialog" aria-labelledby="profile-heading">
+ <form id="profile-form">
+  <div class="dialog-head"><div><span class="profile-eyebrow">徐海差旅助手</span><h2 id="profile-heading">个人信息设置</h2></div><button type="button" class="close-dialog" aria-label="关闭个人信息设置">×</button></div>
+  <p id="profile-description" class="profile-description">填写一次，以后自动带入表单。</p>
+  <div class="profile-identity"><span class="avatar" id="profile-preview-avatar">徐</span><div><strong>你的基本信息</strong><small>用于出差申请与差旅报销</small></div></div>
+  <label class="profile-field" for="profile-name">姓名<input id="profile-name" name="name" autocomplete="name" maxlength="80" required placeholder="请输入姓名"></label>
+  <label class="profile-field" for="profile-job-title">职务 / 职称<input id="profile-job-title" name="job_title" autocomplete="organization-title" maxlength="80" required placeholder="例如：讲师、副教授"></label>
+  <label class="profile-field" for="profile-department">所属部门<input id="profile-department" name="department" maxlength="100" required placeholder="例如：计算机系、教务处"></label>
+  <label class="profile-field" for="profile-fund-no">经费编号<input id="profile-fund-no" name="fund_no" maxlength="100" required placeholder="请输入经费编号"></label>
+  <label class="profile-field" for="profile-fund-name">经费名称<span class="profile-auto-label">根据所属部门自动生成</span><input id="profile-fund-name" readonly placeholder="填写所属部门后自动生成"></label>
+  <p class="profile-note">信息保存在当前浏览器对应的档案中。表格里手工修改过的内容会保留。</p>
+  <details class="profile-note"><summary>记录备份与找回</summary><p>保存找回文件后，换浏览器也可以找回当前服务中的记录。此文件能访问你的记录，请自行保管。它不包含票据原件，服务器仍需备份。</p><button type="button" class="quiet-button" id="export-session">保存找回文件</button><button type="button" class="quiet-button" id="restore-session">导入找回文件</button><input type="file" id="session-file" accept="application/json,.json" hidden></details>
+  <p id="profile-error" role="alert" hidden></p>
+  <div class="profile-actions"><button type="button" id="profile-later" class="quiet-button">稍后填写</button><button type="submit" id="profile-save" class="primary">保存个人信息</button></div>
+ </form>
+</dialog>
+<dialog id="source-dialog"><div class="dialog-head"><h2 id="source-title">材料内容</h2><button class="close-dialog" aria-label="关闭">×</button></div><div id="source-body"></div></dialog>
+<dialog id="delete-record-dialog" aria-labelledby="delete-record-heading"><div class="dialog-head"><h2 id="delete-record-heading">删除出差记录</h2><button class="close-dialog" aria-label="关闭">×</button></div><p>确定删除“<strong id="delete-record-title"></strong>”？</p><p class="muted">这条记录的两张表单和上传材料将一起删除，删除后无法恢复。</p><p id="delete-record-error" role="alert" hidden></p><div class="profile-actions"><button class="quiet-button close-dialog" id="cancel-delete-record" autofocus>取消</button><button id="confirm-delete-record" class="danger-button">确认删除</button></div></dialog>
+<dialog id="rename-dialog"><form id="rename-form"><div class="dialog-head"><h2>出差名称</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div><input id="record-title" maxlength="80" required placeholder="例如：南京培训"><button class="primary" type="submit">保存名称</button></form></dialog>
+<dialog id="print-dialog"><div class="dialog-head"><h2>打印前核对</h2><button class="close-dialog" aria-label="关闭">×</button></div><p id="print-description"></p><ul id="print-checks"></ul><p class="muted">将打开系统打印窗口，可选择打印机或“另存为 PDF”。</p><button id="confirm-print" class="primary">继续打印</button></dialog>
+<script type="module" src="/static/app.js?v=20260920"></script>
+</body></html>

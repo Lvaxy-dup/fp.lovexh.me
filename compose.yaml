@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TRAVEL_DATA_DIR: /data
+      TRAVEL_COOKIE_SECURE: "true"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - travel-data:/data
+    mem_limit: 2g
+    cpus: 2
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  travel-data:

@@ -1,0 +1,16 @@
+.runtime/
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+.local-archive/
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+*.log
+backups/
+data/
+差旅记录找回文件*.json

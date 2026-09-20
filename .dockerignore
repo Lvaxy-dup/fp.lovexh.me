@@ -1,0 +1,14 @@
+**
+!Dockerfile
+!requirements.lock
+!server/
+!server/*.py
+!skills/
+!skills/travel-agent.md
+!skills/automatic-fill.md
+!static/
+!static/*.html
+!static/*.css
+!static/*.js
+!static/images/
+!static/images/*

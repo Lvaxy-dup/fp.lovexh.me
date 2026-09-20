@@ -13,4 +13,6 @@ __pycache__/
 *.log
 backups/
 data/
+!server/data/
+!server/data/*.md
 差旅记录找回文件*.json

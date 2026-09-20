@@ -10,6 +10,7 @@ from .provider import completion
 from .forms import FIELDS,CATEGORIES,REASONS,patch,validate,money,recalculate,reimbursement_receipt
 from .transport import record_transport_invoice, estimate_flight_times
 from .invoice_amounts import verify_invoice_amount
+from .application_budget import estimate_application_budget
 
 S={'type':'string'}
 SOURCE={'type':'object','properties':{'material_id':S,'page':{'type':'integer','minimum':1},'user':{'type':'boolean'}},'additionalProperties':False}
@@ -18,6 +19,7 @@ def spec(name,description,properties,required=()):
     return {'type':'function','function':{'name':name,'description':description,'parameters':{'type':'object','properties':properties,'required':list(required),'additionalProperties':False}}}
 
 TOOLS=[
+ spec('estimate_application_budget','申请表专用。先读完当前通知、填写出差地点与日期、收费状态和明确会务费，再估算徐州到目的地高铁二等座正常单程票价，不刻意估高、不加余量，程序仅将单程票价乘2作为往返预算。住宿程序按城市查住宿标准、按出差天数减一晚计算；补助与报销规则一致。必须给出估价理由，不假称查询实时票价。',{'city':S,'province':S,'one_way_fare':{'type':'number','minimum':0,'maximum':5000},'reason':{'type':'string','minLength':8,'maxLength':1000},'source':SOURCE},['city','province','one_way_fare','reason','source']),
  spec('get_form_state','读取当前表单、字段白名单、来源和人工修改状态。',{}),
  spec('read_material','读取材料某一页；材料清单中的 page_count 表示总页数。',{'material_id':S,'page':{'type':'integer','minimum':1}},['material_id','page']),
  spec('fill_fields','批量填写当前表单的允许字段，每批填写共享同一来源。金额合计由程序计算。',{'values':{'type':'object'},'source':SOURCE},['values','source']),
@@ -36,6 +38,7 @@ for tool in TOOLS:
         tool['function']['description']+=' 若票面明确列出不同分段价格，用 amounts（行号字符串到金额）提供全部明细且合计必须等于 total；只有总额时省略 amounts。程序核对材料中的合计，找不到或冲突时保留空白，不得换成其他金额绕过。'
 LABELS={'infer_fields':'补全可推测信息','estimate_train_arrival':'推算火车到达时间','get_form_state':'查看表单','read_material':'阅读材料','fill_fields':'填写表单','record_expense':'整理费用','validate_form':'核对与计算','ask_user':'确认缺失信息','skip_fields':'保留空白'}
 LABELS.update(record_transport_invoice='登记交通票据总额', estimate_flight_times='推算飞机起止时间')
+LABELS['estimate_application_budget']='估算申请表交通与住宿预算'
 
 
 class Agent:
@@ -49,11 +52,14 @@ class Agent:
         system += '\n当前日期（中国标准时间）：'+datetime.now(timezone(timedelta(hours=8))).date().isoformat()
         system += '\n出差事由 reasons 必须为数组，可用值：'+json.dumps(REASONS,ensure_ascii=False)+'；培训或会议材料应直接选择会议培训，不必再问用户。'
         tools=copy.deepcopy([t for t in TOOLS if not automatic or t['function']['name'] not in ('ask_user','skip_fields')])
+        if kind!='application':tools=[t for t in tools if t['function']['name']!='estimate_application_budget']
         if automatic:
             system += '\n'+(ROOT/'skills/automatic-fill.md').read_text(encoding='utf-8')
         field_properties={k:({'type':'array','items':{'enum':REASONS}} if k=='reasons' else {'type':['string','number','null']} if k.startswith(('budget_','expense_')) or k.endswith('.fare') else {'type':'string'}) for k in FIELDS[kind]}
         if kind=='reimbursement':
             field_properties={k:v for k,v in field_properties.items() if not k.endswith(('.fare','.invoice'))}
+        else:
+            field_properties={k:v for k,v in field_properties.items() if k not in ('budget_transport','budget_hotel','budget_allowance','lodging_tier')}
         next(t for t in tools if t['function']['name']=='fill_fields')['function']['parameters']['properties']['values']={'type':'object','properties':field_properties,'additionalProperties':False}
         messages=[{'role':'system','content':system}]
         history=[m for m in data['messages'] if not automatic and m['form']==kind and m['role'] in ('user','assistant')][-16:]
@@ -81,7 +87,7 @@ class Agent:
                             definition=next(t for t in tools if t['function']['name']==name)
                             schema_validate(args,definition['function']['parameters'])
                             result=self.execute(owner,rid,kind,name,args,read,base,question,automatic=automatic)
-                            if name in ('fill_fields','record_expense','record_transport_invoice','estimate_flight_times','skip_fields','estimate_train_arrival','infer_fields') and 'error' not in result: mutated=True
+                            if name in ('estimate_application_budget','fill_fields','record_expense','record_transport_invoice','estimate_flight_times','skip_fields','estimate_train_arrival','infer_fields') and 'error' not in result: mutated=True
                         except (ValueError,TypeError,KeyError,StopIteration,ValidationError) as e:
                             result={'error':str(e)[:250]}
                         messages.append({'role':'tool','tool_call_id':call['id'],'content':json.dumps(result,ensure_ascii=False)})
@@ -113,13 +119,19 @@ class Agent:
             page=next(p for p in m['pages'] if p['page']==args['page'])
             read.add((m['id'],args['page']))
             return {'material_id':m['id'],'name':m['name'],**page}
-        if name in ('fill_fields','record_expense','infer_fields','record_transport_invoice','estimate_flight_times'):
+        if name in ('estimate_application_budget','fill_fields','record_expense','infer_fields','record_transport_invoice','estimate_flight_times'):
             source=args['source']
             if source.get('user'):
                 if automatic: raise ValueError('自动填写只能引用实际材料，不能将系统任务当作用户提供的事实')
                 source={'user':True,'quote':question[:2000]}
             elif (source.get('material_id'),source.get('page')) not in read:
                 raise ValueError('必须先读取来源材料的对应页')
+            if name=='estimate_application_budget':
+                if kind!='application':raise ValueError('预算估算只用于申请表，不能估算报销票面金额')
+                if not source.get('user'):
+                    material=next(m for m in data['materials'] if m['id']==source['material_id'] and m['form']==kind)
+                    if any((material['id'],p['page']) not in read for p in material['pages']):raise ValueError('请先读完该通知所有页面，核对日期、地点及收费后再计算预算')
+                return self.store.change(owner,rid,lambda d:estimate_application_budget(d,args['city'],args['province'],args['one_way_fare'],args['reason'],source))[1]
             if name in ('record_transport_invoice','estimate_flight_times'):
                 if kind!='reimbursement': raise ValueError('此工具只用于报销行程')
                 if name=='record_transport_invoice':
@@ -146,6 +158,7 @@ class Agent:
                     return patch(d,kind,changes,'agent',estimate)
                 return self.store.change(owner,rid,infer)[1]
             if name=='fill_fields':
+                if kind=='application' and any(k in ('budget_transport','budget_hotel','budget_allowance','lodging_tier') for k in args['values']):raise ValueError('交通和住宿预算使用 estimate_application_budget，补助由程序计算；住宿类别由老师设置')
                 if kind=='reimbursement' and any(k.startswith('expense_') for k in args['values']): raise ValueError('其他费用请通过 record_expense 逐票据录入')
                 if kind=='reimbursement' and any(k.endswith(('.fare','.invoice')) for k in args['values']):
                     raise ValueError('交通票号和金额必须通过 record_transport_invoice 登记整张票据，往返总额只能计一次；请先单独填写行程信息')

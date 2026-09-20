@@ -54,6 +54,7 @@
       <fieldset class="engine-choice"><legend>识别方式</legend><label><input type="radio" name="engine" value="deepseek" checked><span>DeepSeek</span><small>逐页阅读</small></label><label><input type="radio" name="engine" value="paddle"><span>PaddleOCR</span><small>版面识别</small></label></fieldset>
      </section>
      <section class="materials-details"><div class="material-section-heading"><h2>已导入材料</h2><span id="material-count">0 份</span></div><div id="materials" class="material-list"></div></section>
+     <div id="application-budget-controls" class="report-controls" hidden><h2>申请预算设置</h2><label class="fee-choice">人员类别<select id="lodging-tier" aria-label="住宿标准人员类别"><option value="">按个人信息</option><option value="其他人员">其他人员</option><option value="教授及院领导、院长助理">教授及院领导、院长助理</option></select></label><label class="fee-choice">是否收取会务费或培训费<select id="application-has-fee" aria-label="申请预算是否收取会务费或培训费"><option value="">自动判断</option><option value="是">是，收费</option><option value="否">否，未收费</option></select></label></div>
      <div id="report-controls" class="report-controls" hidden><h2>实际出差期间</h2><div class="period-inputs"><input type="date" id="report-start" aria-label="实际出差开始日期"><span>至</span><input type="date" id="report-end" aria-label="实际出差结束日期"></div><label class="fee-choice">是否实际收取会务费或培训费<select id="has-fee" aria-label="是否实际收取会务费或培训费"><option value="">根据材料及费用金额判断</option><option value="是">是，实际收费</option><option value="否">否，未收费</option></select></label><p id="allowance-hint" class="hint">每天180元；有会务费或培训费只计首尾，无这两项费用按完整出差日期计算，包含出发日和返回日。</p></div>
      <div id="checks" class="checks"></div>
     </div>
@@ -88,5 +89,5 @@
 <dialog id="delete-record-dialog" aria-labelledby="delete-record-heading"><div class="dialog-head"><h2 id="delete-record-heading">删除出差记录</h2><button class="close-dialog" aria-label="关闭">×</button></div><p>确定删除“<strong id="delete-record-title"></strong>”？</p><p class="muted">这条记录的两张表单和上传材料将一起删除，删除后无法恢复。</p><p id="delete-record-error" role="alert" hidden></p><div class="profile-actions"><button class="quiet-button close-dialog" id="cancel-delete-record" autofocus>取消</button><button id="confirm-delete-record" class="danger-button">确认删除</button></div></dialog>
 <dialog id="rename-dialog"><form id="rename-form"><div class="dialog-head"><h2>出差名称</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div><input id="record-title" maxlength="80" required placeholder="例如：南京培训"><button class="primary" type="submit">保存名称</button></form></dialog>
 <dialog id="print-dialog"><div class="dialog-head"><h2>打印前核对</h2><button class="close-dialog" aria-label="关闭">×</button></div><p id="print-description"></p><ul id="print-checks"></ul><p class="muted">将打开系统打印窗口，可选择打印机或“另存为 PDF”。</p><button id="confirm-print" class="primary">继续打印</button></dialog>
-<script type="module" src="/static/app.js?v=20260920"></script>
+<script type="module" src="/static/app.js?v=20260920-budget-v2"></script>
 </body></html>

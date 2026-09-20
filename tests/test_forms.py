@@ -12,10 +12,12 @@ def record(tmp_path):
 def update(store,rid,kind,values,**kwargs):
     return store.change('teacher',rid,lambda d:patch(d,kind,values,**kwargs))[0]
 
-def test_application_no_estimated_budget(record):
+def test_application_dates_calculate_allowance_without_inventing_fares(record):
     s,r=record;d=update(s,r,'application',{'start':'2026-09-10','end':'2026-09-13'})
     assert d['forms']['application']['values']['days']==4
-    assert not d['forms']['application']['values'].get('budget_total')
+    assert d['forms']['application']['values']['budget_allowance']=='720.00'
+    assert not d['forms']['application']['values'].get('budget_transport')
+    assert not d['forms']['application']['values'].get('budget_hotel')
 
 def test_subsidy_and_decimal_totals(record):
     s,r=record;d=update(s,r,'reimbursement',{'start':'2026-09-10','end':'2026-09-13','trip.0.fare':'172','expense_hotel':'1212.10'})

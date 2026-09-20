@@ -6,6 +6,7 @@ def remove_material(data,mid):
     material=next((m for m in data['materials'] if m['id']==mid),None)
     if material is None:raise KeyError(mid)
     kind=material['form'];form=data['forms'][kind]
+    if form.get('budget_plan',{}).get('source',{}).get('material_id')==mid:form.pop('budget_plan',None)
     cleared=[]
     for key,meta in list(form['meta'].items()):
         if meta.get('owner')!='user' and meta.get('source',{}).get('material_id')==mid:

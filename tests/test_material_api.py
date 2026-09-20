@@ -96,7 +96,7 @@ def test_profile_apply_is_scoped_and_protected(client):
     assert d['forms']['application']['values']['name']=='张老师'
     assert d['forms']['application']['values']['fund_no']=='00123'
     assert d['forms']['application']['values']['fund_name']=='计算机系经费'
-    assert 'job_title' not in d['forms']['application']['values']
+    assert d['forms']['application']['values']['job_title']=='讲师'
     assert not d['forms']['reimbursement']['values'].get('name')
     owner=c.cookies.get('travel_session')
     d=api.store.change(owner,rid,lambda d:patch(d,'application',{'name':'模型乱填'},owner='agent'))[0]

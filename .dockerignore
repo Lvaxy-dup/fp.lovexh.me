@@ -3,6 +3,8 @@
 !requirements.lock
 !server/
 !server/*.py
+!server/data/
+!server/data/*.md
 !skills/
 !skills/travel-agent.md
 !skills/automatic-fill.md

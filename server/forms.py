@@ -2,12 +2,14 @@
 from datetime import date, time, datetime, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import re
+from .allowance import allowance_dates
 
 REASONS=['业务工作','会议培训','实习实训','竞赛','招生就业','科研','其他']
 CATEGORIES={'hotel':'住宿费','meeting':'会务费','training':'培训费','insurance':'保险费','change':'退票/改签费','local':'市内短途车费','other':'其他费用'}
 COMMON={'name':'姓名','department':'所属部门','fund_no':'经费编号','fund_name':'经费名称','destination':'出差地点'}
 APP={**COMMON,'companions':'同行人员','reasons':'出差事由','start':'出差开始日期','end':'出差结束日期','plane':'是否乘坐飞机','purpose':'简述出差内容',
-     'budget_transport':'城际交通费','budget_hotel':'住宿费','budget_allowance':'伙食补助和市内交通费','budget_meeting':'会务费','budget_other':'其他费用'}
+     'budget_transport':'城际交通费','budget_hotel':'住宿费','budget_allowance':'伙食补助和市内交通费','budget_meeting':'会务费','budget_other':'其他费用',
+     'has_fee':'是否有会务费或培训费','lodging_tier':'住宿标准人员类别','job_title':'职务/职称'}
 REIM={**COMMON,'job_title':'职务/职称','start':'实际出差开始日期','end':'实际出差结束日期','has_fee':'是否有会务费或培训费'}
 for i in range(7):
     for k,v in {'start':'出发日期','start_time':'出发时间','end':'到达日期','end_time':'到达时间','origin':'起点','destination':'终点','mode':'交通工具','fare':'票面金额','invoice':'票据号码'}.items():
@@ -34,6 +36,7 @@ def normalized(form,key,value):
         return list(dict.fromkeys(value))
     if key in ('plane','has_fee'):
         if value not in ('是','否'): raise ValueError('请选择是或否')
+    if key=='lodging_tier' and value not in ('其他人员','教授及院领导、院长助理'):raise ValueError('请选择表内住宿人员类别')
     if key in ('start','end') or re.match(r'trip\.\d+\.(start|end)$',key):
         if not isinstance(value,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',value): raise ValueError('日期格式应为 YYYY-MM-DD')
         date.fromisoformat(value)
@@ -95,12 +98,8 @@ def allocate_allowance(v,rows,start,end,has_fee=False):
     for i in range(7):
         v[f'trip.{i}.allowance_days']=''
         v[f'trip.{i}.allowance_total']=''
-    if not start or not end or end<start:return None
-    a,b=date.fromisoformat(start),date.fromisoformat(end)
-    days=(b-a).days+1
-    if days>366: return None
-    # A same-day trip has one unique boundary date, never two allowances.
-    dates=sorted({a,b}) if has_fee else [a+timedelta(days=i) for i in range(days)]
+    dates=allowance_dates(start,end,has_fee)
+    if dates is None:return None
     counts={}
     for day in dates:
         earlier=[i for i in rows if v[f'trip.{i}.start']<=day.isoformat()]
@@ -130,7 +129,9 @@ def recalculate(form):
         days=(date.fromisoformat(v['end'])-date.fromisoformat(v['start'])).days+1
         if days<=0: warnings.append('结束日期早于开始日期'); days=None
     v['days']=days if days else ''
-    if form.get('kind')=='application': return warnings
+    if form.get('kind')=='application':
+        from .application_budget import recalculate_application_budget
+        return warnings+recalculate_application_budget(form)
     entries=form.get('expenses',{})
     for cat in CATEGORIES:
         key='expense_'+cat
@@ -199,7 +200,7 @@ def validate(data,kind):
                         missing.append({'field':k,'label':FIELDS[kind][k]})
     if data['agent']['status']=='running' and data['agent'].get('form')==kind: warnings.append('助手仍在填写，当前内容可能尚未完成')
     if any(m['status']!='done' for m in data['materials'] if m['form']==kind): warnings.append('仍有材料未完成识别，请核对后再打印')
-    estimated=[{'field':k,'label':FIELDS[kind].get(k,k),'reason':m['source'].get('reason',''),'value':form['values'].get(k,'')} for k,m in form['meta'].items() if m.get('source',{}).get('estimated') and form['values'].get(k) not in (None,'')]
+    estimated=[{'field':k,'label':FIELDS[kind].get(k,k),'reason':m['source'].get('reason',''),'value':form['values'].get(k,'')} for k,m in form['meta'].items() if m.get('source',{}).get('estimated') and not m.get('source',{}).get('budget_estimate') and form['values'].get(k) not in (None,'')]
     if estimated: warnings.append('含模型推测内容，请核对；推测期间对应补助为暂估')
     computed={k:form['values'].get(k,'') for k in ('days','budget_total','transport_total','other_total','ticket_total','allowance_days','allowance_total','grand_total','grand_upper','allowance_basis')}
     return {'missing':missing,'warnings':warnings,'estimated':estimated,'computed':computed,'allowance_rule':'每天180元；有会务费或培训费只计出发日和返回日，同日往返计1天；无这两项费用按完整出差日期计算，包含出发日和返回日。'}

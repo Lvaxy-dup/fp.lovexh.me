@@ -132,6 +132,13 @@ $('#autofill').onclick=()=>generateForms().catch(e=>toast(e.message));
 $('#rename').onclick=()=>{$('#record-title').value=record.title;$('#rename-dialog').showModal()};$('#rename-form').onsubmit=async e=>{e.preventDefault();try{accept(await api(endpoint('/title'),{method:'PATCH',body:JSON.stringify({title:$('#record-title').value.trim()})}));$('#rename-dialog').close();await listRecords()}catch(e){toast(e.message)}};$$('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 $('#fit').onclick=()=>{manualZoom=null;fitPaper();$('#paper-viewport').scrollTo(0,0)};
 $('#zoom-in').onclick=()=>zoomPaper(.1);$('#zoom-out').onclick=()=>zoomPaper(-.1);
+// Only intercept Ctrl+wheel inside the preview, including focused form inputs.
+$('#paper-viewport').addEventListener('wheel',e=>{
+ if(!e.ctrlKey)return;
+ e.preventDefault();
+ e.stopPropagation();
+ if(e.deltaY)zoomPaper(e.deltaY<0?.05:-.05);
+},{passive:false,capture:true});
 $('#print').onclick=()=>preparePrint().catch(e=>toast(e.message));$('#confirm-print').onclick=printNow;
 const paperObserver=new ResizeObserver(()=>requestAnimationFrame(fitPaper));paperObserver.observe($('#paper-viewport'));paperObserver.observe($('#paper'));
 document.fonts.ready.then(fitPaper);

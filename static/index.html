@@ -42,7 +42,7 @@
   <div class="workbench">
    <section class="document-editor" id="document-editor" aria-label="表单编辑区">
     <div class="document-toolbar"><div class="document-caption"><h1 id="current-form-title">教职工出差申请表</h1><span id="paper-size">A4 纵向</span></div><button class="icon-button" id="focus-toggle" aria-label="进入专注模式" title="专注模式 · 收起两侧面板" aria-pressed="false"><svg class="icon"><use href="#i-expand"/></svg></button></div>
-    <div class="paper-viewport" id="paper-viewport"><div class="paper-stage" id="paper-stage"><article class="paper application" id="paper" aria-label="可编辑表单"></article></div></div>
+    <div class="paper-viewport" id="paper-viewport" title="按住 Ctrl 并滚动鼠标滚轮可缩放表单"><div class="paper-stage" id="paper-stage"><article class="paper application" id="paper" aria-label="可编辑表单"></article></div></div>
     <footer class="document-footer"><span class="edit-hint"><i class="dot"></i>点击表格编辑 · 自动保存</span><div class="zoom-controls"><button id="zoom-out" class="icon-button" aria-label="缩小表单" title="缩小">−</button><output id="zoom-level" aria-live="polite">100%</output><button id="zoom-in" class="icon-button" aria-label="放大表单" title="放大">＋</button><span class="toolbar-divider"></span><button id="fit" class="fit-button" aria-pressed="true" title="完整显示整张表单">整页适配</button></div></footer>
    </section>
    <aside id="materials-panel" class="materials-panel" aria-label="当前表单的材料与填写操作">
@@ -89,5 +89,5 @@
 <dialog id="delete-record-dialog" aria-labelledby="delete-record-heading"><div class="dialog-head"><h2 id="delete-record-heading">删除出差记录</h2><button class="close-dialog" aria-label="关闭">×</button></div><p>确定删除“<strong id="delete-record-title"></strong>”？</p><p class="muted">这条记录的两张表单和上传材料将一起删除，删除后无法恢复。</p><p id="delete-record-error" role="alert" hidden></p><div class="profile-actions"><button class="quiet-button close-dialog" id="cancel-delete-record" autofocus>取消</button><button id="confirm-delete-record" class="danger-button">确认删除</button></div></dialog>
 <dialog id="rename-dialog"><form id="rename-form"><div class="dialog-head"><h2>出差名称</h2><button type="button" class="close-dialog" aria-label="关闭">×</button></div><input id="record-title" maxlength="80" required placeholder="例如：南京培训"><button class="primary" type="submit">保存名称</button></form></dialog>
 <dialog id="print-dialog"><div class="dialog-head"><h2>打印前核对</h2><button class="close-dialog" aria-label="关闭">×</button></div><p id="print-description"></p><ul id="print-checks"></ul><p class="muted">将打开系统打印窗口，可选择打印机或“另存为 PDF”。</p><button id="confirm-print" class="primary">继续打印</button></dialog>
-<script type="module" src="/static/app.js?v=20260920-budget-v2"></script>
+<script type="module" src="/static/app.js?v=20260920-wheel-zoom"></script>
 </body></html>
